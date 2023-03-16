@@ -25,7 +25,7 @@ def coaching_changes():
     url = "https://wbbblog.com/wp-json/wp/v2/posts/33126"
     r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
     json = r.json()
-    if parse(json['modified']) > datetime.now() - timedelta(hours=24):
+    if parse(json['modified']) > datetime.now() - timedelta(hours=1):
         msg = "WBBBlog has updated its coaching changes page, see https://wbbblog.com/womens-basketball-coaching-changes-tracker-2023/"
         try:
             response = client.chat_postMessage(
