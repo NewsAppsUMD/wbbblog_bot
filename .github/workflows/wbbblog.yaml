@@ -1,6 +1,8 @@
 name: Check WBBBlog for updates
 
 on:
+  push:
+    push:
   schedule:
     - cron: '0 * * * *'
 
