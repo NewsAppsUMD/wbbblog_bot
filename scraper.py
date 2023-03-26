@@ -46,5 +46,27 @@ def coaching_changes():
             assert e.response["error"]
             print(f"Got an error: {e.response['error']}")
 
+def transfers():
+    url = "https://wbbblog.com/wp-json/wp/v2/posts/30448"
+    r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+    json = r.json()
+    now_utc = datetime.now(pytz.utc)
+    now_eastern = now_utc.astimezone(eastern)
+    if eastern.localize(parse(json['modified'], tzinfos=tzinfos)) > now_eastern - timedelta(hours=1):
+        msg = "WBBBlog has updated its transfers page, see https://wbbblog.com/womens-basketball-transfers-d-i-2022-23/"
+        try:
+            response = client.chat_postMessage(
+                channel="slack-bots",
+                text=msg,
+                unfurl_links=True, 
+                unfurl_media=True
+            )
+            print("success!")
+        except SlackApiError as e:
+            assert e.response["ok"] is False
+            assert e.response["error"]
+            print(f"Got an error: {e.response['error']}")
+
 if __name__ == "__main__":
     coaching_changes()
+    transfers()
