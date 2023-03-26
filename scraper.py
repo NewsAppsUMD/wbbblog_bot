@@ -1,7 +1,7 @@
 import os
 from datetime import datetime, timedelta
 from dateutil.parser import parse
-from dateutil.tz import gettz
+import pytz
 import requests
 from bs4 import BeautifulSoup
 
@@ -10,6 +10,8 @@ from slack.errors import SlackApiError
 
 slack_token = os.environ.get('SLACK_API_TOKEN')
 client = WebClient(token=slack_token)
+
+eastern = pytz.timezone("US/Eastern")
 
 def last_updated(soup):
     return soup.find('meta', {'property': 'article:modified_time'}).get('content')
@@ -25,7 +27,9 @@ def coaching_changes():
     url = "https://wbbblog.com/wp-json/wp/v2/posts/33126"
     r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
     json = r.json()
-    if parse(json['modified']) > datetime.now() - timedelta(hours=1):
+    now_utc = datetime.now(pytz.utc)
+    now_eastern = now_utc.astimezone(eastern)
+    if parse(json['modified']) > now_eastern - timedelta(hours=1):
         msg = "WBBBlog has updated its coaching changes page, see https://wbbblog.com/womens-basketball-coaching-changes-tracker-2023/"
         try:
             response = client.chat_postMessage(
