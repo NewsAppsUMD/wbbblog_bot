@@ -12,6 +12,7 @@ from slack.errors import SlackApiError
 slack_token = os.environ.get('SLACK_API_TOKEN')
 client = WebClient(token=slack_token)
 
+# set the timezone to Eastern
 eastern = pytz.timezone("US/Eastern")
 tzinfos = {"EST": tz.gettz("US/Eastern")}
 
@@ -26,11 +27,15 @@ def soupify(url):
     return BeautifulSoup(r.text, "html.parser") 
 
 def coaching_changes():
+    # the json url for that page
     url = "https://wbbblog.com/wp-json/wp/v2/posts/33126"
+    # grab the url with requests and save the json
     r = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
     json = r.json()
+    # setup current time with timezone
     now_utc = datetime.now(pytz.utc)
     now_eastern = now_utc.astimezone(eastern)
+    # check to see if the page's last modified time is greater than (most recent) an hour ago
     if eastern.localize(parse(json['modified'], tzinfos=tzinfos)) > now_eastern - timedelta(hours=1):
         msg = "WBBBlog has updated its coaching changes page, see https://wbbblog.com/womens-basketball-coaching-changes-tracker-2023/"
         try:
